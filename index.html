@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Clear-Site-Data" content="cache, cookies, storage, executionContexts" />
+    <meta http-equiv="Expires" content="-1" />
+    <title>Tocan Task Management</title>
+
+    <link href="./favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="./js/bootstrap-5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="./js/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="./css/style.css" type="text/css">
+
+    <script type="text/javascript" src="./js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="./js/bootstrap-5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="./js/sweetalert.min.js"></script>
+    <script type="text/javascript" src="./js/flatpickr/dist/flatpickr.js"></script>
+    <script type="text/javascript" src="./js/flatpickr/dist/l10n/uk.js"></script>
+    <script type="text/javascript" src="./js/app.js"></script>
+    <script type="text/javascript" src="./js/script.js"></script>
+</head>
+
+<body class="light-theme">
+    <!-- Button trigger modal error -->
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalError" id="btnmodalError"
+        style="display:none;"></button>
+    <!-- Modal error -->
+    <div class="modal fade" id="modalError" tabindex="-1" aria-labelledby="modalErrorLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="modalErrorLabel">
+                        <div class="alert alert-danger d-flex align-items-center" role="alert">
+                            <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Danger:">
+                                <use xlink:href="#exclamation-triangle-fill" />
+                            </svg>
+                            <div id="err-messege">Some error message</div>
+                        </div>
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>Управління задачами Tocan</h1>
+            <div class="header-actions">
+                <button id="createTaskBtn" class="btn btn-header" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                    data-bs-title="Створити задачу" onfocusout="clearTooltip()">
+                    <img src="./img/add.png" alt="+" width="24" height="24">
+                </button>
+                <button id="settings" class="btn btn-header" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                    data-bs-title="Налаштування" onfocusout="clearTooltip()">
+                    <img src="./img/office-settings.png" alt="Settings" width="24" height="24">
+                </button>
+                <button id="themeToggle" class="btn btn-header" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                    data-bs-title="Змінити тему" onfocusout="clearTooltip()">
+                    <img src="./img/waxinggibbousmoon.png" alt="🌙" class="theme-icon-dark" width="24" height="24">
+                    <img src="./img/waningcrescentmoon.png" alt="☀️" class="theme-icon-light" width="24" height="24">
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <aside class="people-sidebar">
+            <h2>Співробітники:</h2>
+            <div id="peopleList" class="people-list"></div>
+        </aside>
+
+        <!-- Task Content -->
+        <main class="task-content">
+            <div id="emptyState" class="empty-state">
+                <!-- <div class="empty-icon">👥</div> -->
+                <div class="empty-icon">
+                    <img src="./img/group_people.png" alt="👥">
+                </div>
+                <h3>Виберіть учасника команди</h3>
+                <p>Виберіть учасника команди на лівій панелі, щоб переглядати та керувати його задачами</p>
+            </div>
+
+            <div id="taskSection" class="task-section" style="display: none;">
+                <div class="task-header">
+                    <div class="task-header-info">
+                        <h2 id="selectedPersonName">Задачі</h2>
+                        <p>Керування та відстеження задач</p>
+                    </div>
+                    <div class="task-filters">
+                        <form class="search" role="search" onsubmit="return handleSearch(event)">
+                            <input type="search" id="searchInput" placeholder="Пошук завдання..." class="search-input"
+                                aria-label="Search">
+                            <button class="btn btn-search" type="submit">
+                                <img src="./img/search.svg" alt="Пошук" class="invert-icon">
+                            </button>
+                        </form>
+
+                        <select id="statusFilter" class="form-select status-filter">
+                            <option value="0">Активні</option>
+                            <option value="1">В черзі</option>
+                            <option value="2">В роботі</option>
+                            <option value="3">На перевірці</option>
+                            <option value="4">Готово</option>
+                            <option value="5">Відхилено</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="task-stats" id="taskStats">
+                    <span class="stat-badge">Всього: <span class="all">0</span></span>
+                    <button type="button" class="btn position-relative btn-state btn-state-active"
+                        data-state="0">Активні
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                    </button>
+                    <button type="button" class="btn position-relative btn-state btn-state-in-line" data-state="1">В
+                        черзі
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                    </button>
+                    <button type="button" class="btn position-relative btn-state btn-state-work" data-state="2">В роботі
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                    </button>
+                    <button type="button" class="btn position-relative btn-state btn-state-review" data-state="3">На
+                        перевірці
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                    </button>
+                    <button type="button" class="btn position-relative btn-state btn-state-ready" data-state="4">Готово
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                    </button>
+                    <button type="button" class="btn position-relative btn-state btn-state-cancel"
+                        data-state="5">Відхилено
+                        <span
+                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+                    </button>
+                </div>
+
+                <div class="task-list-container">
+                    <div id="noTasks" class="no-tasks" style="display: none;">
+                        <div class="no-tasks-icon">
+                            <img src="./img/search.png" alt="🔍">
+                        </div>
+                        <h3>Задач не знайдено</h3>
+                        <p>Створіть свою першу задачу, щоб розпочати</p>
+                    </div>
+                    <div id="taskList" class="task-list"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Задача</h3>
+                <button class="modal-close" data-modal-id="taskModal">&times;</button>
+            </div>
+            <form id="taskForm" class="modal-form">
+                <input type="hidden" name="taskId" id="taskId" value="0">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="taskTitle" name="taskTitle" placeholder="Назва"
+                        autocomplete="off" value="" required>
+                    <label for="taskTitle">Назва<span class="required">*</span></label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="projectName" name="projectName"
+                        placeholder="Назва проекту" autocomplete="off" value="">
+                    <label for="projectName">Назва проекту</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select class="form-select select" id="responsiblePM" name="responsiblePM"
+                        aria-label="responsiblePM" required></select>
+                    <label for="responsiblePM">Відповідальний<span class="required">*</span></label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select class="form-select select" id="assignedTo" name="assignedTo" aria-label="assignedTo"
+                        required></select>
+                    <label for="assignedTo">Виконавець<span class="required">*</span></label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select class="form-select select" id="taskStatus" name="taskStatus" aria-label="taskStatus"
+                        required>
+                        <option value="1">В черзі</option>
+                        <option value="2">В роботі</option>
+                        <option value="3">На перевірці</option>
+                        <option value="4">Готово</option>
+                        <option value="5">Відхилено</option>
+                    </select>
+                    <label for="taskStatus">Статус<span class="required">*</span></label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select class="form-select select" id="taskPriority" name="taskPriority" aria-label="taskPriority"
+                        required>
+                        <option value="" disabled selected>-- Оберіть пріоритет задачі --</option>
+                        <option value="1">Невідкладна (ще учора мала бути готова)</option>
+                        <option value="2">Критична (вже сьогодні потрібно зробити)</option>
+                        <option value="3">Серйозна (після кави можна почати вирішувати)</option>
+                        <option value="4">Звичайна (залежить від дедлайну)</option>
+                        <option value="5">Незначна (в цьому році)</option>
+                    </select>
+                    <label for="taskPriority">Пріоритет<span class="required">*</span></label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select class="form-select select" id="taskType" name="taskType" aria-label="taskType" required>
+                        <option value="1">Баг</option>
+                        <option value="2">Дороботка</option>
+                        <option value="3">Завдання</option>
+                        <option value="4">Функціональність</option>
+                        <option value="5">Техпідтримка</option>
+                    </select>
+                    <label for="taskType">Тип<span class="required">*</span></label>
+                </div>
+                <div class="form-floating mb-3">
+                    <span class="estimate-span">Оцінка часу (Estimate time):</span><span class="required">*</span>
+                    <div class="estimate">
+                        <div class="estimate-item">
+                            <label for="taskEstimateHour">годин:</label>
+                            <input type="number" class="form-control" id="taskEstimateHour" name="taskEstimateHour"
+                                placeholder="годин" autocomplete="off" value="1" step="1" min="0" max="1000">
+                        </div>
+                        <div class="estimate-item">
+                            <label for="taskEstimateMinute">хвилин:</label>
+                            <input type="number" class="form-control" id="taskEstimateMinute" name="taskEstimateMinute"
+                                placeholder="хвилин" autocomplete="off" value="0" step="1" min="0" max="60">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-floating mb-3">
+                    <div class="flatpickr-div">
+                        <label for="taskPlannedExecutionDate" class="flatpickr-label">Планова дата виконання:</label>
+                        <input type="text" id="taskPlannedExecutionDate" name="taskPlannedExecutionDate"
+                            class="form-control flatpickr flatpickr-input">
+                    </div>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="taskSource" name="taskSource"
+                        placeholder="Посилання на таск" autocomplete="off" value="" required>
+                    <label for="taskSource">Посилання на таск (YouTrack/Taiga)</label>
+                </div>
+                <div class="form-floating">
+                    <textarea class="form-control" placeholder="Опис" id="taskDescription" autocomplete="off" value=""
+                        name="taskDescription" style="height: 120px"></textarea>
+                    <label for="taskDescription">Опис</label>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-primary modal-cancel"
+                        data-modal-id="taskModal">Скасувати</button>
+                    <button type="button" id="saveTaskButton" class="btn btn-primary btn-save">Зберегти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task History Modal -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h3>Історія задачі</h3>
+                <button class="modal-close" data-modal-id="historyModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- <div class="history-filters">
+                    <label for="startDate">З:</label>
+                    <input type="date" id="startDate">
+                    <label for="endDate">По:</label>
+                    <input type="date" id="endDate">
+                    <button id="filterHistory" class="btn btn-secondary">Фільтр</button>
+                </div> -->
+                <div id="historyList" class="history-list">
+                    <!-- History will be populated by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- People Modal -->
+    <div id="peopleModal" class="modal modal-fullscreen">
+        <div class="modal-content modal-fullscreen">
+            <div class="modal-header">
+                <h3>Налаштування (співробітники)</h3>
+                <button class="modal-close" data-modal-id="peopleModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body-header">
+                    <form class="search" role="search" onsubmit="return handleSearch(event)">
+                        <input type="search" id="searchInput" placeholder="Пошук..." class="search-input"
+                            aria-label="Search">
+                        <button class="btn btn-search" type="submit">
+                            <img src="./img/search.svg" alt="Пошук" class="invert-icon">
+                        </button>
+                        <button id="createPersonBtn" class="btn btn-header" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                            data-bs-title="Створити користувача" onfocusout="clearTooltip()">
+                            <img src="./img/add.png" alt="+" width="24" height="24">
+                        </button>
+                    </form>
+                </div>
+                <div class="modal-body-table">
+                    <table class="table table-hover table-persons">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col"></th>
+                                <th scope="col">Прізвище</th>
+                                <th scope="col">Ім`я</th>
+                                <th scope="col">По-батькові</th>
+                                <th scope="col">Позиція</th>
+                                <th scope="col">Телефон</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Статус</th>
+                                <th scope="col"></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Person Modal -->
+    <div id="personModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Співробітник</h3>
+                <button class="modal-close" data-modal-id="personModal">&times;</button>
+            </div>
+            <form id="personForm" class="modal-form">
+                <input type="hidden" name="personId" id="personId" value="0">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="personSurname" name="personSurname"
+                        placeholder="Прізвище" autocomplete="off" value="" required>
+                    <label for="personSurname">Прізвище<span class="required">*</span></label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="personName" name="personName" placeholder="Ім`я"
+                        autocomplete="off" value="" required>
+                    <label for="personName">Ім`я<span class="required">*</span></label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="personPatronymic" name="personPatronymic"
+                        placeholder="По-батькові" autocomplete="off" value="">
+                    <label for="personPatronymic">По-батькові</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select class="form-select select" id="personPosition" name="personPosition"
+                        aria-label="personPosition" required>
+                        <option value="Developer">Developer</option>
+                        <option value="Project manager">Project manager</option>
+                        <option value="Supervisor">Supervisor</option>
+                        <option value="System administrator">System administrator</option>
+                        <option value="Tester">Tester</option>
+                    </select>
+                    <label for="personPosition">Позиція<span class="required">*</span></label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select class="form-select select" id="personSex" name="personSex" aria-label="personSex" required>
+                        <option value="1">Чоловіча</option>
+                        <option value="2">Жіноча</option>
+                    </select>
+                    <label for="personSex">Стать<span class="required">*</span></label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="phone" class="form-control" id="personPhone" name="personPhone"
+                        placeholder="+38(000)000-00-00" autocomplete="off" value="">
+                    <label for="personPhone">Телефон</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control" id="personEmail" name="personEmail"
+                        placeholder="email@ua.com" autocomplete="off" value="">
+                    <label for="personEmail">Email</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <select class="form-select select" id="personState" name="personState" aria-label="personState"
+                        required>
+                        <option value="0">Працює</option>
+                        <option value="1">Звільнено</option>
+                    </select>
+                    <label for="personState">Статус<span class="required">*</span></label>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-primary modal-cancel"
+                        data-modal-id="personModal">Скасувати</button>
+                    <button type="button" id="savePersonButton" class="btn btn-primary btn-save">Зберегти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loader_dots"></div>
+</body>
+
+</html>

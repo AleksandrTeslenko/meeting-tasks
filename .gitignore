@@ -1,0 +1,12 @@
+*.php~
+*.bak
+*.log 
+.idea
+.idea/*
+.env
+
+app/vendor
+
+# Ігнорувати всі файли в будь-якому каталозі logs
+**/logs/*
+!**/logs/.gitkeep
