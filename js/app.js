@@ -1,6 +1,7 @@
 $(document).ready(function () {
 	try {
 		$('.loader_dots').show();
+		if (BACKEND) { $('.offline').hide(); }
 		initializeTheme();
 		renderPeople();
 		bindEvents();

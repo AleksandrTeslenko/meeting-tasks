@@ -21,8 +21,8 @@ try {
         locale: 'uk'
     };
 
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
     function showError(data) {
         $('#err-messege').text(data.message);
@@ -201,66 +201,75 @@ try {
         const persons = $('#peopleModal .table-persons tbody');
         persons.empty();
 
-        $.post('app/ajax.php?getPeople=true&all=1', function (data) {
-            if (data.success) {
-                $.each(data.result, function (index, value) {
-                    let class_bg = (value.deleted == 1) ? 'bg-remove-person' : '';
-                    
-                    const personElement = $(`
-                        <tr>
-                            <th scope="row">${index + 1}</th>
-                            <td class="icon ${class_bg}">
-                                <div class="person-icon">
-                                    <img src="./img/${value.icon}" alt="👤">
-                                </div>
-                            </td>
-                            <td class="surname ${class_bg}">${value.surname}</td>
-                            <td class="name ${class_bg}">${value.name}</td>
-                            <td class="patronymic ${class_bg}">${value.patronymic}</td>
-                            <td class="position ${class_bg}">${value.position}</td>
-                            <td class="sex ${class_bg}" style="display:none;">${value.sex}</td>
-                            <td class="deleted ${class_bg}" style="display:none;">${value.deleted}</td>
-                            <td class="phone ${class_bg}">${value.phone}</td>
-                            <td class="email ${class_bg}">${value.email}</td>
-                            <td class="state ${class_bg}">${value.state}</td>
-                            <td class="${class_bg}">
-                                <button class="btn btn-secondary edit-person" data-person-id="${value.id}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Редагувати" onfocusout="clearTooltip()">
-                                    <img class="invert-icon" src="./img/pencil-square.svg" alt="Редагувати" />
-                                </button>
-                            </td>
-                        </tr>
-                    `).each(function () {
-                        $(this).find('.edit-person').click(function () {
-                            const personId = $(this).data('person-id');
-                            const row = $(this).closest('tr');
-                            const person = {
-                                id: personId,
-                                icon: row.find('.person-icon img').attr('src'),
-                                surname: row.find('.surname').text().trim(),
-                                name: row.find('.name').text().trim(),
-                                patronymic: row.find('.patronymic').text().trim(),
-                                position: row.find('.position').text().trim(),
-                                sex: row.find('.sex').text().trim(),
-                                deleted: row.find('.deleted').text().trim(),
-                                phone: row.find('.phone').text().trim(),
-                                email: row.find('.email').text().trim(),
-                            };
+        if (BACKEND) {
+            $.post('app/ajax.php?getPeople=true&all=1', function (data) {
+                if (data.success) {
+                    setPeopleTable(persons, data.result);
+                } else {
+                    showError(data);
+                }
 
-                            // console.log({ person });
-                            openEditPersonModal(person);
-                        });
-                    });
-
-                    persons.append(personElement);
-                });
-
-                window.updatePeopleTableLayout = setPeopleModalLayout;
-            } else {
-                showError(data);
-            }
-
+                setTimeout(function () { $('.loader_dots').hide(); }, time_hide_dots_animation);
+            });
+        } else {
+            setPeopleTable(persons, dataPeople);
             setTimeout(function () { $('.loader_dots').hide(); }, time_hide_dots_animation);
+        }
+    }
+
+    function setPeopleTable(persons, data) {
+        $.each(data, function (index, value) {
+            let class_bg = (value.deleted == 1) ? 'bg-remove-person' : '';
+
+            const personElement = $(`
+                    <tr>
+                        <th scope="row">${index + 1}</th>
+                        <td class="icon ${class_bg}">
+                            <div class="person-icon">
+                                <img src="./img/${value.icon}" alt="👤">
+                            </div>
+                        </td>
+                        <td class="surname ${class_bg}">${value.surname}</td>
+                        <td class="name ${class_bg}">${value.name}</td>
+                        <td class="patronymic ${class_bg}">${value.patronymic}</td>
+                        <td class="position ${class_bg}">${value.position}</td>
+                        <td class="sex ${class_bg}" style="display:none;">${value.sex}</td>
+                        <td class="deleted ${class_bg}" style="display:none;">${value.deleted}</td>
+                        <td class="phone ${class_bg}">${value.phone}</td>
+                        <td class="email ${class_bg}">${value.email}</td>
+                        <td class="state ${class_bg}">${value.state}</td>
+                        <td class="${class_bg}">
+                            <button class="btn btn-secondary edit-person" data-person-id="${value.id}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="Редагувати" onfocusout="clearTooltip()">
+                                <img class="invert-icon" src="./img/pencil-square.svg" alt="Редагувати" />
+                            </button>
+                        </td>
+                    </tr>
+                `).each(function () {
+                $(this).find('.edit-person').click(function () {
+                    const personId = $(this).data('person-id');
+                    const row = $(this).closest('tr');
+                    const person = {
+                        id: personId,
+                        icon: row.find('.person-icon img').attr('src'),
+                        surname: row.find('.surname').text().trim(),
+                        name: row.find('.name').text().trim(),
+                        patronymic: row.find('.patronymic').text().trim(),
+                        position: row.find('.position').text().trim(),
+                        sex: row.find('.sex').text().trim(),
+                        deleted: row.find('.deleted').text().trim(),
+                        phone: row.find('.phone').text().trim(),
+                        email: row.find('.email').text().trim(),
+                    };
+
+                    // console.log({ person });
+                    openEditPersonModal(person);
+                });
+            });
+
+            persons.append(personElement);
         });
+
+        window.updatePeopleTableLayout = setPeopleModalLayout;
     }
 
     function setPeopleModalLayout() {
@@ -290,38 +299,48 @@ try {
         const peopleList = $('#peopleList');
         peopleList.empty();
 
-        $.post('app/ajax.php?getPeople=true', function (data) {
-            // console.log({ data });
-            if (data.success) {
-                mockPeople = data.result;
+        if (BACKEND) {
+            $.post('app/ajax.php?getPeople=true', function (data) {
+                // console.log({ data });
+                if (data.success) {
+                    mockPeople = data.result;
+                    populateFormSelects();
+                    createPersonItems(peopleList, mockPeople);
+                } else {
+                    showError(data);
+                    setTimeout(function () { $('.loader_dots').hide(); }, time_hide_dots_animation);
+                }
+            });
+        } else {
+            mockPeople = dataPeople;
+            populateFormSelects();
+            createPersonItems(peopleList, mockPeople);
+        }
+    }
 
-                populateFormSelects();
-
-                // <div class="person-icon">👤</div>
-
-                $.each(data.result, function (index, value) {
-                    const personElement = $(`
-                        <div class="person-item" data-person-id="${value.id}">
-                            <div class="person-icon">
-                                <img src="./img/${value.icon}" alt="👤">
-                            </div>
-                            <div class="person-item-info">
-                                <div class="person-name">${value.surname} ${value.name}</div>
-                                <div class="person-position">${value.position}</div>
-                            </div>
-                        </div>
-                    `);
-
-                    personElement.click(function () {
-                        selectPerson(value.id);
-                    });
-
-                    peopleList.append(personElement);
-                });
-            } else {
-                showError(data);
-                setTimeout(function () { $('.loader_dots').hide(); }, time_hide_dots_animation);
+    function createPersonItems(peopleList, data) {
+        $.each(data, function (index, value) {
+            if (value.deleted == 1) {
+                return true;
             }
+
+            const personElement = $(`
+                <div class="person-item" data-person-id="${value.id}">
+                    <div class="person-icon">
+                        <img src="./img/${value.icon}" alt="👤">
+                    </div>
+                    <div class="person-item-info">
+                        <div class="person-name">${value.surname} ${value.name}</div>
+                        <div class="person-position">${value.position}</div>
+                    </div>
+                </div>
+            `);
+
+            personElement.click(function () {
+                selectPerson(value.id);
+            });
+
+            peopleList.append(personElement);
         });
     }
 
@@ -346,7 +365,14 @@ try {
 
     function renderTasks() {
         if (!selectedPersonId) return;
-        getFilteredTasks();
+        if (BACKEND) {
+            getFilteredTasks();
+        } else {
+            $('#taskList').hide();
+            $('#noTasks').show();
+            renderTaskStats(statuses);
+            setTimeout(function () { $('.loader_dots').hide(); }, time_hide_dots_animation);
+        }
     }
 
     function getFilteredTasks() {
@@ -709,35 +735,41 @@ try {
         $('.loader_dots').show();
         $('#savePersonButton').prop('disabled', true);
 
-        const notification = personId && personId !== ''
-            ? 'Дані оновлено успішно'
-            : 'Створено успішно';
+        const notification = (BACKEND) ? ((personId && personId !== '') ? 'Дані оновлено успішно' : 'Створено успішно') : 'Дані не оновлено';
 
-        fetch('app/ajax.php?submitPerson=true', {
-            method: 'POST',
-            body: formData
-        })
-            .then(res => res.json())
-            .then(data => {
-                $('#savePersonButton').prop('disabled', false);
-                setTimeout(function () { $('.loader_dots').hide(); }, time_hide_dots_animation);
-
-                if (data.success) {
-                    showNotification(notification);
-                    $('#personModal').removeClass('show');
-                    $('#personForm')[0].reset();
-                    renderTasks();
-                } else {
-                    showError(data);
-                }
-
-                renderPeopleTable();
-                renderPeople();
+        if (BACKEND) {
+            fetch('app/ajax.php?submitPerson=true', {
+                method: 'POST',
+                body: formData
             })
-            .catch(err => {
-                showError('Помилка:' + err);
-                setTimeout(function () { $('.loader_dots').hide(); }, time_hide_dots_animation);
-            });
+                .then(res => res.json())
+                .then(data => {
+                    $('#savePersonButton').prop('disabled', false);
+                    setTimeout(function () { $('.loader_dots').hide(); }, time_hide_dots_animation);
+
+                    if (data.success) {
+                        showNotification(notification);
+                        $('#personModal').removeClass('show');
+                        $('#personForm')[0].reset();
+                        renderTasks();
+                    } else {
+                        showError(data);
+                    }
+
+                    renderPeopleTable();
+                    renderPeople();
+                })
+                .catch(err => {
+                    showError('Помилка:' + err);
+                    setTimeout(function () { $('.loader_dots').hide(); }, time_hide_dots_animation);
+                });
+        } else {
+            $('#savePersonButton').prop('disabled', false);
+            setTimeout(function () { $('.loader_dots').hide(); }, time_hide_dots_animation);
+            showNotification(notification);
+            $('#personModal').removeClass('show');
+            $('#personForm')[0].reset();
+        }
     }
 
     // Add keyframe animation for notifications

@@ -1170,6 +1170,11 @@ input:-webkit-autofill {
     color: var(--text-input-label);
 }
 
+.offline {
+    font-size: 20px;
+    margin-left: 10px;
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
     .main-container {

@@ -22,6 +22,7 @@
     <script type="text/javascript" src="./js/sweetalert.min.js"></script>
     <script type="text/javascript" src="./js/flatpickr/dist/flatpickr.js"></script>
     <script type="text/javascript" src="./js/flatpickr/dist/l10n/uk.js"></script>
+    <script type="text/javascript" src="./js/settings.js"></script>
     <script type="text/javascript" src="./js/app.js"></script>
     <script type="text/javascript" src="./js/script.js"></script>
 </head>
@@ -51,7 +52,8 @@
     <!-- Header -->
     <header class="header">
         <div class="header-content">
-            <h1>Управління задачами</h1>
+            <h1>Управління задачами<span class="offline" data-bs-toggle="tooltip" data-bs-placement="bottom"
+                    data-bs-title="Обмежене завантаження/створення/корегування даних, лише перегляд (демо)" onfocusout="clearTooltip()">(offline)</span></h1>
             <div class="header-actions">
                 <button id="createTaskBtn" class="btn btn-header" data-bs-toggle="tooltip" data-bs-placement="bottom"
                     data-bs-title="Створити задачу" onfocusout="clearTooltip()">
@@ -302,8 +304,8 @@
                         <button class="btn btn-search" type="submit">
                             <img src="./img/search.svg" alt="Пошук" class="invert-icon">
                         </button>
-                        <button id="createPersonBtn" class="btn btn-header" data-bs-toggle="tooltip" data-bs-placement="bottom"
-                            data-bs-title="Створити користувача" onfocusout="clearTooltip()">
+                        <button id="createPersonBtn" class="btn btn-header" data-bs-toggle="tooltip"
+                            data-bs-placement="bottom" data-bs-title="Створити користувача" onfocusout="clearTooltip()">
                             <img src="./img/add.png" alt="+" width="24" height="24">
                         </button>
                     </form>
